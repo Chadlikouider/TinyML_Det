@@ -1,7 +1,8 @@
 """
  Functions and utilities related to localization boxes
  Such as: generating anchor boxes, IoU computation, NMS...ect
- This module was inspired from: https://github.com/qfgaohao/pytorch-ssd/blob/master/vision/utils/box_utils.py
+ This module was inspired from: 
+ https://github.com/qfgaohao/pytorch-ssd/blob/master/vision/utils/box_utils.py
 @author: CHADLI KOUIDER
 """
 import collections

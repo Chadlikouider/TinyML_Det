@@ -12,8 +12,11 @@ from typing import List
 import math
 from utils.box_utils import SSDSpec, SSDBoxSizes, generate_ssd_priors
 
+
 ################################## generate_ssd_priors #################################
 # Define named tuples for the SSD specification
+
+
 SSDBoxSizes = collections.namedtuple('SSDBoxSizes', ['min', 'max'])
 SSDSpec = collections.namedtuple('SSDSpec', ['feature_map_size', 'shrinkage', 'box_sizes', 'aspect_ratios'])
 

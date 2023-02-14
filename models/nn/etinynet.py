@@ -1,5 +1,6 @@
 """
-
+This architecture is taken from: EtinyNet: Extremely Tiny Network for TinyML 
+<https://doi.org/10.1609/aaai.v36i4.20387 > paper
 
 @author: CHADLI KOUIDER
 """
@@ -50,6 +51,7 @@ def conv_1x1_bn(inp, oup):
         nn.ReLU(inplace=True),
     )
 
+
 def add_conv(out, channels=1, in_channels=0, kernel=1, stride=1, pad=0, num_group=1,
              active=True, norm=True):
     """
@@ -76,10 +78,12 @@ def add_conv(out, channels=1, in_channels=0, kernel=1, stride=1, pad=0, num_grou
                          kernel_size = kernel, stride = stride, padding=pad, 
                          groups=num_group, bias=False))
     
-    if norm:
-        out.append(nn.BatchNorm2d(channels))
     if active:
         out.append(nn.ReLU(inplace=True))
+        
+    if norm:
+        out.append(nn.BatchNorm2d(channels))
+
         
 ###############################################################################
 # Internal module (Private)
@@ -95,8 +99,6 @@ class LinearBottleneck(nn.Module):
        Number of input channels.
    channels : int
        Number of output channels.
-   t : int
-       Layer expansion ratio.
    stride : int
        stride
    norm_layer : object
@@ -109,22 +111,21 @@ class LinearBottleneck(nn.Module):
         self.use_shortcut2 = shortcut
         
         
-        # out1 = dconv+BN => 1x1 conv 
+        # out1 = dconv+BN => 1x1 conv
         self.out1 = nn.Sequential() # 1x1
-        add_conv(self.out1, in_channels = channels[0], channels = channels[0],
-                 kernel = 3, stride = stride, pad = 1, num_group = channels[0],
+        add_conv(self.out1, in_channels=channels[0], channels = channels[0],
+                 kernel=3, stride=stride, pad=1, num_group=channels[0],
                  active = False)
-        add_conv(self.out1, in_channels = channels[0], channels = channels[1],
+        add_conv(self.out1, in_channels=channels[0], channels=channels[1],
                  active = True)
         
         
         # out2 = dconv+BN+ReLU 
-        self.out2 = nn.Sequential() # 1x1
+        self.out2 = nn.Sequential()#1x1
         add_conv(self.out2,
-                  in_channels=channels[1],channels=channels[1],kernel=3, 
-                  stride=1, pad=1, num_group=channels[1], active=True)
-        
-        
+                 in_channels=channels[1], channels=channels[1], kernel=3,
+                 stride=1, pad=1, num_group=channels[1], active=True)
+
     def forward(self,x):
         out = self.out1(x)
         if self.use_shortcut1:
@@ -137,7 +138,8 @@ class LinearBottleneck(nn.Module):
             else:
                 out = out + x1
         return out
-            
+
+
 ###############################################################################
 # Backbone network
 ###############################################################################
@@ -145,47 +147,52 @@ class EtinyNet(nn.Module):
     def __init__(self, multiplier=1., n_class=1000):
         super(EtinyNet, self).__init__()
         
-        self.feature1 = nn.Sequential()
-        add_conv(self.feature1, int(32 * multiplier), in_channels=3, kernel=3,
+        self.features = []
+        add_conv(self.features, int(32 * multiplier), in_channels=3, kernel=3,
                  stride = (2,2), pad=1)
-        self.feature1.append(nn.MaxPool2d((2,2)))
+        self.features.append(nn.MaxPool2d((2,2)))
         
         # make the linear depthwise block (LB)
         channels_group = [[32, 32],  [32, 32], [32, 32], [32, 32],
                                   [32, 128], [128, 128], [128, 128], [128, 128]]
-        strides =   [1,1,1,1] + [2,1,1,1] 
-        shortcuts = [0,0,0,0] + [0,0,0,0]
+        strides = [1, 1, 1, 1] + [2, 1, 1, 1]
+        shortcuts = [0, 0, 0, 0] + [0, 0, 0, 0]
         for cg, s, sc in zip(channels_group, strides, shortcuts):
-            self.feature1.append(LinearBottleneck(channels=np.int32(np.array(cg)*multiplier),
-                                                stride=s, shortcut=sc))
+            self.features.append(LinearBottleneck(channels=np.int32(np.array(cg)*multiplier),
+                                                  stride=s, shortcut=sc))
         
         # Make the first the dense linear depthwise block (DLB)
-        self.feature2 = nn.Sequential()
+        
         
         channels_group = [[128, 192], [192, 192], [192, 192]]
-        strides =   [2,1,1]
-        shortcuts = [1,1,1]
+        strides = [2, 1, 1]
+        shortcuts = [1, 1, 1]
         for cg, s, sc in zip(channels_group, strides, shortcuts):
-            self.feature2.append(LinearBottleneck(channels=np.int32(np.array(cg)*multiplier),
-                                                       stride=s, shortcut=sc))
+            self.features.append(LinearBottleneck(channels=np.int32(np.array(cg)*multiplier),
+                                                  stride=s, shortcut=sc))
         
         # Make the second the dense linear depthwise block (DLB)
-        self.feature3 = nn.Sequential()
+        
         
         channels_group = [[192, 256], [256, 256], [256, 512]]
-        strides =   [2,1,1]
+        strides = [2, 1, 1]
         shortcuts = [1,1,1]
         for cg, s, sc in zip(channels_group, strides, shortcuts):
-            self.feature3.append(LinearBottleneck(channels=np.int32(np.array(cg)*multiplier),
-                                                       stride=s, shortcut=sc))
+            self.features.append(LinearBottleneck(channels=np.int32(np.array(cg)*multiplier),
+                                                  stride=s, shortcut=sc))
+        
+        # make it nn.Sequential
+        self.features = nn.Sequential(*self.features) 
     
-    def forward(self,x):
-        x1 = self.feature1(x)
-        x2 = self.feature2(x1)
-        x3 = self.feature3(x2)
-        return x3
+    def forward(self, x):
+        
+        x = self.features(x)
+        
+        return x
 
 
 if __name__ == "__main__": 
     model = EtinyNet()
-    output=model(torch.zeros((1, 3, 224, 224)))
+    output = model(torch.zeros((1, 3, 224, 224)))
+    print(output)
+    
