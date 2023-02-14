@@ -9,3 +9,11 @@ Additionally, the repository also includes SSD/SSD-Lite implementations based on
 2. OpenCV
 3. PyTorch 1.4.0+
 4. Tensorflow lite
+
+
+## base network
+
+![backboneEtinynet1 0](https://user-images.githubusercontent.com/110521665/218684229-e5bc6e2b-49fb-4a56-bec4-f2768fd7c43c.png)
+![backboneEtinynet0 75](https://user-images.githubusercontent.com/110521665/218686290-2bb646f9-4cf6-46fe-a5a7-08c8e140c645.png)
+
+<center> <u>Figure</u>:   *left:Backbone architecture of Etinynet1.0.right: Backbone architecture of Etinynet0.75.*</center>
