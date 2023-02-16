@@ -3,7 +3,36 @@ This repository primarily incorporates [EtinyNet: Extremely Tiny Network for Tin
 The goal of this implementation is to create a lightweight and accurate object detection model suitable for embedded systems. <br>
 Additionally, the repository also includes SSD/SSD-Lite implementations based on MobileNetV2, Squeezenet, and Squeeznext.
 
+## Codebase Structure 
+(The codebase structure after completing the codebase construction process, which is shown below in [`Detailed Instruction`](#detailed-instruction))
 
+    .
+    ├── ...
+    ├── config/                                # configuration file folder.
+    │   ├── config.py                          # The config file to set configuration of network.
+    │   └── ...                                
+    ├── dataset/                               # dataset file folder.
+    |   ├── pascal_voc.py                      # dataloader file for images with annotation in pascal voc format
+    ├── Inc                                    # Header file folder.
+    ├── Src                                    # Source file folder.
+    │   ├── main.cpp                           # Main source file.
+    │   ├── TinyEngine                         # TinyEngine folder.
+    │   │   ├── codegen                        # Code generation folder.
+    │   │   │   ├── Include                    
+    │   │   │   │   ├── genModel.h             # Header file of memory allocation.
+    │   │   │   │   └── ...                    
+    │   │   │   └── Source                     
+    │   │   │       ├── genModel.c             # Codegen of computational graph.
+    │   │   │       └── ...                    
+    │   │   ├── include                        
+    │   │   └── src/kernels                    
+    │   │       ├── fp_requantize_op           # Operators with floating-point requantization.
+    │   │       └── int_only                   # Operators with only integer.
+    │   └── ...                                
+    └── ...
+    
+    
+    
 ## Requirement
 1. Python 3.6+
 2. OpenCV
