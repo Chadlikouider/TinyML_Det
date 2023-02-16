@@ -13,21 +13,12 @@ Additionally, the repository also includes SSD/SSD-Lite implementations based on
     │   └── ...                                
     ├── dataset/                               # dataset file folder.
     |   ├── pascal_voc.py                      # dataloader file for images with annotation in pascal voc format
-    ├── Inc                                    # Header file folder.
-    ├── Src                                    # Source file folder.
+    ├── models/                                # Models file folder.
+    |   ├──nn/                                 # backbone file folder
+    |   ├──ssd/                                # Backbone + SSD file folder
+    ├── utils/                                 # utilities file folder.
     │   ├── main.cpp                           # Main source file.
     │   ├── TinyEngine                         # TinyEngine folder.
-    │   │   ├── codegen                        # Code generation folder.
-    │   │   │   ├── Include                    
-    │   │   │   │   ├── genModel.h             # Header file of memory allocation.
-    │   │   │   │   └── ...                    
-    │   │   │   └── Source                     
-    │   │   │       ├── genModel.c             # Codegen of computational graph.
-    │   │   │       └── ...                    
-    │   │   ├── include                        
-    │   │   └── src/kernels                    
-    │   │       ├── fp_requantize_op           # Operators with floating-point requantization.
-    │   │       └── int_only                   # Operators with only integer.
     │   └── ...                                
     └── ...
     
