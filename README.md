@@ -33,4 +33,3 @@ Additionally, the repository also includes SSD/SSD-Lite implementations based on
 
 ## base network
 ![image](https://user-images.githubusercontent.com/110521665/218944268-bfb1682f-2327-485c-8d44-006441233249.png)<center>**<u>Figure 1</u>**:   *Backbone architecture of Etinynet1.0.*</center><p>&nbsp;</p>
-![image](https://user-images.githubusercontent.com/110521665/218944368-12731790-d95e-4aa2-be53-9b62216829f4.png)<center>**<u>Figure 2</u>**:   *Backbone architecture of Etinynet0.75.*</center>
