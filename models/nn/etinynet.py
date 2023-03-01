@@ -52,6 +52,18 @@ def conv_1x1_bn(inp, oup):
     )
 
 
+def SeperableConv2d(in_channels, out_channels, kernel_size=1, stride=1, 
+                    padding=0):
+    """Replace Conv2d with a depthwise Conv2d and Pointwise Conv2d.
+    """
+    return nn.Sequential(
+        nn.Conv2d(in_channels=in_channels, out_channels=in_channels, kernel_size=kernel_size,
+               groups=in_channels, stride=stride, padding=padding),
+        nn.BatchNorm2d(in_channels),
+        nn.ReLU(),
+        nn.Conv2d(in_channels=in_channels, out_channels=out_channels, kernel_size=1),
+    )
+
 def add_conv(out, channels=1, in_channels=0, kernel=1, stride=1, pad=0, num_group=1,
              active=True, norm=True):
     """
@@ -112,20 +124,29 @@ class LinearBottleneck(nn.Module):
         
         
         # out1 = dconv+BN => 1x1 conv
-        self.out1 = nn.Sequential() # 1x1
-        add_conv(self.out1, in_channels=channels[0], channels = channels[0],
+        out1 = [] # 1x1
+        add_conv(out1, in_channels=channels[0], channels = channels[0],
                  kernel=3, stride=stride, pad=1, num_group=channels[0],
                  active = False)
-        add_conv(self.out1, in_channels=channels[0], channels=channels[1],
+        add_conv(out1, in_channels=channels[0], channels=channels[1],
                  active = True)
-        
+        self.out1 = nn.Sequential(*out1)
         
         # out2 = dconv+BN+ReLU 
-        self.out2 = nn.Sequential()#1x1
-        add_conv(self.out2,
+        out2 = []
+        add_conv(out2,
                  in_channels=channels[1], channels=channels[1], kernel=3,
                  stride=1, pad=1, num_group=channels[1], active=True)
-
+        self.out2 = nn.Sequential(*out2)
+        
+        # Increase the dimension using 1 x 1 convolutions 
+        # (Residual connection) with different dimensions
+        if stride != 1 or channels[0] != channels[1]:
+            self.identity_connection = SeperableConv2d(in_channels=channels[0], 
+                                                       out_channels = channels[1], 
+                                                       kernel_size=1, stride=stride)
+        
+        
     def forward(self,x):
         out = self.out1(x)
         if self.use_shortcut1:
@@ -133,10 +154,11 @@ class LinearBottleneck(nn.Module):
         x1 = out
         out = self.out2(out)
         if self.use_shortcut2:
-            if self.use_shortcut1:
-                out = out + x + x1
-            else:
-                out = out + x1
+          if self.use_shortcut1:
+            out = out + x + x1
+          else:
+            x = self.identity_connection(x)
+            out = out + x1 + x
         return out
 
 

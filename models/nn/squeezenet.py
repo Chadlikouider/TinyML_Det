@@ -3,12 +3,19 @@
     modified version of the original code taken from: 
         https://github.com/qfgaohao/pytorch-ssd/blob/master/vision/nn/squeezenet.py
 """
-__all__ = ["SqueezeNet"]
+__all__ = ['SqueezeNet', 'squeezenet1_0', 'squeezenet1_1']
 
 import math
 import torch
 import torch.nn as nn
 import torch.nn.init as init
+import torch.utils.model_zoo as model_zoo
+
+model_urls = {
+    'squeezenet1_0': 'https://download.pytorch.org/models/squeezenet1_0-a815701f.pth',
+    'squeezenet1_1': 'https://download.pytorch.org/models/squeezenet1_1-f364aa15.pth',
+}
+
 class Fire(nn.Module):
 
     def __init__(self, inplanes, squeeze_planes,
@@ -77,7 +84,31 @@ class SqueezeNet(nn.Module):
         x = self.features(x)
         return x
 
+def squeezenet1_0(pretrained=False, **kwargs):
+    r"""SqueezeNet model architecture from the `"SqueezeNet: AlexNet-level
+    accuracy with 50x fewer parameters and <0.5MB model size"
+    <https://arxiv.org/abs/1602.07360>`_ paper.
+    Args:
+        pretrained (bool): If True, returns a model pre-trained on ImageNet
+    """
+    model = SqueezeNet(version=1.0, **kwargs)
+    if pretrained:
+        model.load_state_dict(model_zoo.load_url(model_urls['squeezenet1_0']))
+    return model
 
+
+def squeezenet1_1(pretrained=False, **kwargs):
+    r"""SqueezeNet 1.1 model from the `official SqueezeNet repo
+    <https://github.com/DeepScale/SqueezeNet/tree/master/SqueezeNet_v1.1>`_.
+    SqueezeNet 1.1 has 2.4x less computation and slightly fewer parameters
+    than SqueezeNet 1.0, without sacrificing accuracy.
+    Args:
+        pretrained (bool): If True, returns a model pre-trained on ImageNet
+    """
+    model = SqueezeNet(version=1.1, **kwargs)
+    if pretrained:
+        model.load_state_dict(model_zoo.load_url(model_urls['squeezenet1_1']))
+    return model
 if __name__ == "__main__": 
     model = SqueezeNet()
     output=model(torch.zeros((1, 3, 224, 224)))

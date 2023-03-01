@@ -23,7 +23,7 @@ def SeperableConv2d(in_channels, out_channels, kernel_size=1, stride=1,
     )
 
 def create_etinynet_ssd_lite(num_classes, width_mult=1.0, is_test=False):
-    base_net = EtinyNet(multiplier=width_mult)
+    base_net = EtinyNet(multiplier=width_mult).features
     
     source_layer_indexes = []
     extras = nn.ModuleList([])

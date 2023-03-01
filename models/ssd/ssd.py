@@ -1,7 +1,7 @@
 """
     Implementation of SSD module Adapted from:
-        https://github.com/tranleanh/mobilenets-ssd-pytorch/blob/master/vision/ssd/ssd.py
-@author: CHADLI KOUIDER
+    https://github.com/tranleanh/mobilenets-ssd-pytorch/blob/master/vision/ssd/ssd.py
+    @author: CHADLI KOUIDER
 """
 
 import torch.nn as nn
