@@ -144,11 +144,11 @@ class SSD(nn.Module):
         # (batch size, width, height, number of classes) and make sure it is contiguous in memory.
         confidence = confidence.permute(0, 2, 3, 1).contiguous()
         
-        print("confidence shape = ", confidence.shape)
+        #print("confidence shape = ", confidence.shape)
         # Reshape the "confidence" tensor to (batch size, width * height, number of classes) 
         # so that it can be easily processed in the next step.
         confidence = confidence.view(confidence.size(0), -1, self.num_classes)
-        print("reshape = ", confidence.shape)
+        #print("reshape = ", confidence.shape)
         # Pass the input tensor x through the i-th regression header 
         # and store the output in the "location" variable
         location = self.regression_headers[i](x)

@@ -2,8 +2,8 @@
 
 @author: CHADLI KOUIDER
 """
+import torch
 import numpy as np
-
 
 def compute_average_precision(precision, recall):
     """
@@ -23,3 +23,10 @@ def compute_average_precision(precision, recall):
     # compute under curve area
     areas = (recall[changing_points + 1] - recall[changing_points]) * precision[changing_points + 1]
     return areas.sum()
+
+""" Network profiling """
+
+def count_parameters(net):
+    total_params = sum(p.numel() for p in net.parameters() if p.requires_grad)
+    return total_params
+

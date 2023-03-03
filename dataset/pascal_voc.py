@@ -31,6 +31,19 @@ class PascalVOCDataset(Dataset):
 
 
         self.class_dict = {class_name: i for i, class_name in enumerate(self.class_names)}
+    
+    def get_image(self, idx):
+        img_path = os.path.join(self.root_dir, self.img_list[idx])
+        img = cv2.imread(img_path)
+        if self.transform:
+            img, _ = self.transform(img)
+        return img
+    
+    def get_annotations(self, idx):
+        img_path = os.path.join(self.root_dir, self.img_list[idx])
+        annotations, labels = self.parse_annotations(img_path)
+        return annotations, labels
+
     # Returns the number of images in the dataset
     def __len__(self):
         return len(self.img_list)
@@ -46,7 +59,7 @@ class PascalVOCDataset(Dataset):
             img = self.transform(img)
             
         # Return in tuple form
-        return (img, annotations, labels)
+        return img, annotations, labels
 
     # Parse the annotations for the image from its XML file
     def parse_annotations(self, img_path):

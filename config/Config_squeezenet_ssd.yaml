@@ -1,0 +1,49 @@
+# Dataset information
+dataset:
+  train: path/to/train/dataset
+  val: path/to/validation/dataset
+  num_classes: 10
+  class_names: ['class1', 'class2', ..., 'class10']
+  input_size: 256
+# Model information
+model:
+  backbone: squeezenet1_1 # Available squeezenet1_1 or squeezenet1_0
+  num_classes: 10
+  pretrained: True
+  ssd:
+    feature_maps: [38,19, 10, 5, 3, 1]
+    shrinkage: [8, 16, 32, 64, 100, 300] # the shrinkage factor
+    min_sizes: [60, 105, 150, 195, 240, 285] # Minimum sizes of prior boxes
+    max_sizes: [105, 150, 195, 240, 285, 330] # Maximum sizes of prior boxes
+    aspect_ratios: [[2], [2, 3], [2, 3], [2, 3], [2], [2]] # Aspect ratios of prior boxes
+    variance: [0.1, 0.2]
+    iou_thresh: 0.5 # IOU threshold for non-maximum suppression
+    nms_thresh: 0.45 # NMS threshold for detection
+
+# Training information
+train:
+  batch_size: 32 # Batch size for training
+  optimizer:
+    type: SGD # Name of the optimizer
+    lr: 0.001 # value of the learning rate
+    momentum: 0.9
+    weight_decay: 5e-4 # Weight decay
+  scheduler:
+    type: MultiStepLR # Name of learning rate scheduler
+    milestones: [20, 40] # Learning rate milestones
+    gamma: 0.1 # Learning rate decay factor
+  num_epochs: 50 # Number of epochs for training
+
+# testing information
+test:
+  batch_size: 32 # Batch size for testing
+
+output_dir: path/to/output/directory
+
+# Miscellaneous configuration
+misc:
+  device: cuda:0  # specify the GPU device to use, e.g. cuda:0 or cuda:1
+  checkpoint_dir: /path/to/checkpoints/ # Directory to save trained model
+  log_dir: ./logs # Directory to save training logs
+  log_interval: 15
+  save_interval: 40

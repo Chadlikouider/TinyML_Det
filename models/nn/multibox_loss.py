@@ -2,7 +2,7 @@
 """
 Implement SSD Multibox Loss.
         Basically, Multibox loss combines classification loss
-         and Smooth L1 regression loss
+        and Smooth L1 regression loss
 
 @author: CHADLI KOUIDER
 """

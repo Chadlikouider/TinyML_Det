@@ -109,6 +109,9 @@ def squeezenet1_1(pretrained=False, **kwargs):
     if pretrained:
         model.load_state_dict(model_zoo.load_url(model_urls['squeezenet1_1']))
     return model
+
+
+
 if __name__ == "__main__": 
     model = SqueezeNet()
     output=model(torch.zeros((1, 3, 224, 224)))
