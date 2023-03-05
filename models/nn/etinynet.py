@@ -7,7 +7,7 @@ This architecture is taken from: EtinyNet: Extremely Tiny Network for TinyML
 import torch
 import torch.nn as nn
 import numpy as np
-
+from torchvision._internally_replaced_utils import load_state_dict_from_url
 __all__ = ['EtinyNet']
 
 
@@ -166,7 +166,7 @@ class LinearBottleneck(nn.Module):
 # Backbone network
 ###############################################################################
 class EtinyNet(nn.Module):
-    def __init__(self, multiplier=1., n_class=1000):
+    def __init__(self, multiplier=1.):
         super(EtinyNet, self).__init__()
         
         self.features = []
@@ -211,6 +211,67 @@ class EtinyNet(nn.Module):
         x = self.features(x)
         
         return x
+    
+
+
+UID = "chadlikouider"
+model_urls = {
+    "etn_100": f"https://github.com/{UID}/mobilenetv2.pytorch/raw/master/pretrained/mobilenetv2_1.0-0c6065bc.pth",
+    "etn_075": f"https://github.com/{UID}/mobilenetv2.pytorch/raw/master/pretrained/mobilenetv2_0.75-dace9791.pth",
+    "etn_050": f"https://github.com/{UID}/mobilenetv2.pytorch/raw/master/pretrained/mobilenetv2_0.5-eaa6f9ad.pth",
+    "etn_035": f"https://github.com/{UID}/mobilenetv2.pytorch/raw/master/pretrained/mobilenetv2_0.35-b2e15951.pth",
+}
+
+
+
+def etinynet_100(pretrained = False, progress = True):
+
+    model = EtinyNet(multiplier = 1)
+    if pretrained:
+        state_dict = load_state_dict_from_url(model_urls["etn_100"],
+                                              progress=progress, map_location=torch.device('cpu'))
+        # Remove classifier parameters from the state dictionary
+        state_dict.pop('classifier.1.weight')
+        state_dict.pop('classifier.1.bias')
+        model.load_state_dict(state_dict, strict=False)
+    return model
+
+def etinynet_075(pretrained = False, progress = True):
+
+    model = EtinyNet(multiplier = 0.75)
+    if pretrained:
+        state_dict = load_state_dict_from_url(model_urls["etn_075"],
+                                              progress=progress, map_location=torch.device('cpu'))
+        # Remove classifier parameters from the state dictionary
+        state_dict.pop('classifier.1.weight')
+        state_dict.pop('classifier.1.bias')
+        model.load_state_dict(state_dict, strict=False)
+    return model
+
+def etinynet_050(pretrained = False, progress = True):
+
+    model = EtinyNet(multiplier = 0.5)
+    if pretrained:
+        state_dict = load_state_dict_from_url(model_urls["etn_050"],
+                                              progress=progress, map_location=torch.device('cpu'))
+        # Remove classifier parameters from the state dictionary
+        state_dict.pop('classifier.1.weight')
+        state_dict.pop('classifier.1.bias')
+        model.load_state_dict(state_dict, strict=False)
+    return model
+
+
+def etinynet_035(pretrained = False, progress = True):
+
+    model = EtinyNet(multiplier = 0.35)
+    if pretrained:
+        state_dict = load_state_dict_from_url(model_urls["etn_035"],
+                                              progress=progress, map_location=torch.device('cpu'))
+        # Remove classifier parameters from the state dictionary
+        state_dict.pop('classifier.1.weight')
+        state_dict.pop('classifier.1.bias')
+        model.load_state_dict(state_dict, strict=False)
+    return model
 
 
 if __name__ == "__main__": 

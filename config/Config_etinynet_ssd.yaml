@@ -7,9 +7,9 @@ dataset:
   input_size: 256
 # Model information
 model:
-  version: '1_1' # Available 1_1 or 1_0
-  pretrained: True # True: load the pre-trained(backbone) model,
-                    # False: create the (backbone) model from scratch
+  width_multiplier: 1.0 # can be 1.0, 0.75, 0.5, 0.35
+  pretrained: False     # True: load the pre-trained(backbone) model,
+                        # False: create the (backbone) model from scratch
   type: 'float32' # Available options: float16, float32, float64
   ssd:
     feature_maps: [38,19, 10, 5, 3, 1]
@@ -17,8 +17,8 @@ model:
     min_sizes: [26, 67, 108, 149, 190, 231] # Minimum sizes of prior boxes
     max_sizes: [67, 108, 149, 190, 231, 256] # Maximum sizes of prior boxes
     aspect_ratios: [[2], [2, 3], [2, 3], [2, 3], [2], [2]] # Aspect ratios of prior boxes
-    center_variance: 0.1
-    size_variance: 0.2
+    center_variance: 0.1 # size of variance of anchor boxes
+    size_variance: 0.2 # size of variance of anchor boxes
     iou_thresh: 0.5 # IOU threshold for non-maximum suppression
     nms_thresh: 0.45 # NMS threshold for detection
     #=============================================================

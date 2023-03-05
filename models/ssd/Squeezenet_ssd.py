@@ -6,7 +6,7 @@
 """
 import torch
 from torch.nn import Conv2d, Sequential, ModuleList, ReLU
-from models.nn.squeezenet import squeezenet1_1
+from models.nn.squeezenet import squeezenet1_0, squeezenet1_1
 
 from models.ssd.ssd import SSD
 from config import squeezenet_ssd_config as config
@@ -23,8 +23,14 @@ def SeperableConv2d(in_channels, out_channels, kernel_size=1, stride=1, padding=
     )
 
 
-def create_squeezenet_ssd_lite(num_classes, is_test=False):
-    base_net = squeezenet1_1(False).features  # disable dropout layer
+def create_squeezenet_ssd_lite(num_classes ,is_test=False):
+
+    if config.version == '1_0':
+        base_net = squeezenet1_0(config.pretrained).features  
+    elif config.version == '1_1':
+        base_net = squeezenet1_1(config.pretrained).features  
+    else:
+        raise ValueError('Invalid squeezenet version')
 
     source_layer_indexes = [
         12
@@ -56,23 +62,22 @@ def create_squeezenet_ssd_lite(num_classes, is_test=False):
             SeperableConv2d(in_channels=128, out_channels=256, kernel_size=3, stride=2, padding=1)
         )
     ])
-
     regression_headers = ModuleList([
-        SeperableConv2d(in_channels=512, out_channels=6 * 4, kernel_size=3, padding=1),
-        SeperableConv2d(in_channels=512, out_channels=6 * 4, kernel_size=3, padding=1),
-        SeperableConv2d(in_channels=512, out_channels=6 * 4, kernel_size=3, padding=1),
-        SeperableConv2d(in_channels=256, out_channels=6 * 4, kernel_size=3, padding=1),
-        SeperableConv2d(in_channels=256, out_channels=6 * 4, kernel_size=3, padding=1),
-        Conv2d(in_channels=256, out_channels=6 * 4, kernel_size=1),
+        SeperableConv2d(in_channels=512, out_channels=config.num_priors[0] * 4, kernel_size=3, padding=1), # 1st feature map
+        SeperableConv2d(in_channels=512, out_channels=config.num_priors[1] * 4, kernel_size=3, padding=1), # 2nd feature map
+        SeperableConv2d(in_channels=512, out_channels=config.num_priors[2] * 4, kernel_size=3, padding=1), # 3rd feature map
+        SeperableConv2d(in_channels=256, out_channels=config.num_priors[3] * 4, kernel_size=3, padding=1), # 4th feature map
+        SeperableConv2d(in_channels=256, out_channels=config.num_priors[4] * 4, kernel_size=3, padding=1), # 5th feature map
+        Conv2d(in_channels=256, out_channels=config.num_priors[5] * 4, kernel_size=1),                     # 6th feature map 
     ])
 
     classification_headers = ModuleList([
-        SeperableConv2d(in_channels=512, out_channels=6 * num_classes, kernel_size=3, padding=1),
-        SeperableConv2d(in_channels=512, out_channels=6 * num_classes, kernel_size=3, padding=1),
-        SeperableConv2d(in_channels=512, out_channels=6 * num_classes, kernel_size=3, padding=1),
-        SeperableConv2d(in_channels=256, out_channels=6 * num_classes, kernel_size=3, padding=1),
-        SeperableConv2d(in_channels=256, out_channels=6 * num_classes, kernel_size=3, padding=1),
-        Conv2d(in_channels=256, out_channels=6 * num_classes, kernel_size=1),
+        SeperableConv2d(in_channels=512, out_channels=config.num_priors[0] * num_classes, kernel_size=3, padding=1), # 1st feature map
+        SeperableConv2d(in_channels=512, out_channels=config.num_priors[1] * num_classes, kernel_size=3, padding=1), # 2nd feature map
+        SeperableConv2d(in_channels=512, out_channels=config.num_priors[2] * num_classes, kernel_size=3, padding=1), # 3rd feature map
+        SeperableConv2d(in_channels=256, out_channels=config.num_priors[3] * num_classes, kernel_size=3, padding=1), # 4th feature map
+        SeperableConv2d(in_channels=256, out_channels=config.num_priors[4] * num_classes, kernel_size=3, padding=1), # 5th feature map
+        Conv2d(in_channels=256, out_channels=config.num_priors[5] * num_classes, kernel_size=1),                     # 6th feature map
     ])
 
     return SSD(num_classes, base_net, source_layer_indexes,

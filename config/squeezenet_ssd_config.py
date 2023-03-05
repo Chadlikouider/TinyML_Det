@@ -1,19 +1,15 @@
+"""
+Configuration of training using SquezeNet-SSD (1.0 and 1.1)
+
+@author: CHADLI KOUIDER
+"""
 import yaml
 import os
 import torch
 from utils.box_utils import SSDSpec, SSDBoxSizes, generate_ssd_priors
 # determine the current device and based on that set the pin memory
 # flag
-# DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
 # PIN_MEMORY = True if DEVICE == "cuda" else False
-# specify ImageNet mean and standard deviation
-# initialize our initial learning rate, number of epochs to train
-# for, and the batch size
-# INIT_LR = 1e-4
-# NUM_EPOCHS = 20
-# specify the loss weights
-# LABELS = 1.0
-# BBOX = 1.0
 
 
 # Load the configuration file
@@ -34,15 +30,16 @@ class_names = config['dataset']['class_names']
 input_size = config['dataset']['input_size']
 
 # Model configuration
-backbone = config['model']['backbone']
-num_classes_model = config['model']['num_classes']
+version = config['model']['version']
 pretrained = config['model']['pretrained']
+type = config['model']['type']
 ssd_feature_maps = config['model']['ssd']['feature_maps']
 ssd_shrinkage = config['model']['ssd']['shrinkage']
 ssd_min_sizes = config['model']['ssd']['min_sizes']
 ssd_max_sizes = config['model']['ssd']['max_sizes']
 ssd_aspect_ratios = config['model']['ssd']['aspect_ratios']
-ssd_variance = config['model']['ssd']['variance']
+center_variance = config['model']['ssd']['center_variance']
+size_variance = config['model']['ssd']['size_variance']
 ssd_iou_thresh = config['model']['ssd']['iou_thresh']
 ssd_nms_thresh = config['model']['ssd']['nms_thresh']
 
@@ -73,15 +70,20 @@ log_interval = config['misc']['log_interval']
 save_interval = config['misc']['save_interval']
 output_dir = config['output_dir']
 
-print(ssd_min_sizes)
-print(ssd_max_sizes)
-print(ssd_aspect_ratios)
-print(test_batch_size)
-print(checkpoint_dir)
-print(output_dir)
+
+#   1-Generate small-sized square box: This section appends 1 element to priors.
+#   2-Generate big-sized square box: This section appends 1 element to priors.
+#   3-Change h/w ratio of the small sized box: 
+#     This section appends 2 * len(ssd_aspect_ratios) elements to priors. 
+#     For each aspect ratio, we append 2 priors: one with width = w * sqrt(ratio) and height = h / sqrt(ratio), 
+#     and one with width = w / sqrt(ratio) and height = h * sqrt(ratio).
+num_priors = []
+for i ,aspect_ratio in enumerate(ssd_aspect_ratios):
+    num_priors.append( 1 + 1 + 2 * len(aspect_ratio))
 
 # Define specs list
 specs = []
+
 for i, fmap in enumerate(ssd_feature_maps):
     specs.append(SSDSpec(fmap, ssd_shrinkage[i], 
                          SSDBoxSizes(ssd_min_sizes[i], ssd_max_sizes[i]),

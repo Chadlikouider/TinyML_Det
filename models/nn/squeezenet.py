@@ -41,12 +41,11 @@ class Fire(nn.Module):
 
 class SqueezeNet(nn.Module):
 
-    def __init__(self, version=1.0, num_classes=1000):
+    def __init__(self, version=1.0):
         super(SqueezeNet, self).__init__()
         if version not in [1.0, 1.1]:
             raise ValueError("Unsupported SqueezeNet version {version}:"
                              "1.0 or 1.1 expected".format(version=version))
-        self.num_classes = num_classes
         if version == 1.0:
             self.features = nn.Sequential(
                 nn.Conv2d(3, 96, kernel_size=7, stride=2),
@@ -84,20 +83,24 @@ class SqueezeNet(nn.Module):
         x = self.features(x)
         return x
 
-def squeezenet1_0(pretrained=False, **kwargs):
+def squeezenet1_0(pretrained=False):
     r"""SqueezeNet model architecture from the `"SqueezeNet: AlexNet-level
     accuracy with 50x fewer parameters and <0.5MB model size"
     <https://arxiv.org/abs/1602.07360>`_ paper.
     Args:
         pretrained (bool): If True, returns a model pre-trained on ImageNet
     """
-    model = SqueezeNet(version=1.0, **kwargs)
+    model = SqueezeNet(version=1.0)
     if pretrained:
-        model.load_state_dict(model_zoo.load_url(model_urls['squeezenet1_0']))
+        state_dict = model_zoo.load_url(model_urls['squeezenet1_0'])
+        # Remove classifier parameters from the state dictionary
+        state_dict.pop('classifier.1.weight')
+        state_dict.pop('classifier.1.bias')
+        model.load_state_dict(state_dict, strict=False)
     return model
 
 
-def squeezenet1_1(pretrained=False, **kwargs):
+def squeezenet1_1(pretrained=False):
     r"""SqueezeNet 1.1 model from the `official SqueezeNet repo
     <https://github.com/DeepScale/SqueezeNet/tree/master/SqueezeNet_v1.1>`_.
     SqueezeNet 1.1 has 2.4x less computation and slightly fewer parameters
@@ -105,9 +108,13 @@ def squeezenet1_1(pretrained=False, **kwargs):
     Args:
         pretrained (bool): If True, returns a model pre-trained on ImageNet
     """
-    model = SqueezeNet(version=1.1, **kwargs)
+    model = SqueezeNet(version=1.1)
     if pretrained:
-        model.load_state_dict(model_zoo.load_url(model_urls['squeezenet1_1']))
+        state_dict = model_zoo.load_url(model_urls['squeezenet1_1'])
+        # Remove classifier parameters from the state dictionary
+        state_dict.pop('classifier.1.weight')
+        state_dict.pop('classifier.1.bias')
+        model.load_state_dict(state_dict, strict=False)
     return model
 
 

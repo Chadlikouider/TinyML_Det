@@ -1,3 +1,9 @@
+"""
+    This file is for training the ssd_models including(Squezzenet-SSD, EtinyNet-SSD , and mobileNetV2-SSD)
+
+    @author: CHADLI KOUIDER
+"""
+
 import argparse
 import os
 import logging
@@ -5,8 +11,18 @@ import sys
 import itertools
 
 import torch
+from torch.utils.data import ConcatDataset, DataLoader
+from torchvision import transforms
 
 from utils.misc import str2bool, Timer, freeze_net_layers, store_labels
+from dataset.pascal_voc import PascalVOCDataset
+from models.ssd.ssd import MatchPrior
+from models.ssd.etinynet_ssd import create_etinynet_ssd_lite
+from models.ssd.Squeezenet_ssd import create_squeezenet_ssd_lite
+from config import squeezenet_ssd_config
+from config import etinynet_ssd_config
+
+
 
 parser = argparse.ArgumentParser(
     description='Single Shot MultiBox Detector Training')
@@ -14,31 +30,12 @@ parser = argparse.ArgumentParser(
 parser.add_argument('--datasets', nargs='+', help='Dataset directory path')
 parser.add_argument('--validation_dataset', help='Dataset directory path')
 
-
 parser.add_argument('--net', default="etinynet-ssd",
-                    help="The network architecture, it can be squeezenet-ssd,etinynet-ssd, or mbv2-ssd.")
+                    help="The network architecture, it can be squeezenet-ssd, etinynet-ssd, or mb2-ssd.")
 parser.add_argument('--freeze_base_net', action='store_true',
                     help="Freeze base net layers.")
 parser.add_argument('--freeze_net', action='store_true',
                     help="Freeze all the layers except the prediction head.")
-parser.add_argument('--type', default='float32',
-                     help='Type of tensor: float32, float16, float64. Default: float32')
-parser.add_argument('--width_mult', default=1.0, type=float,
-                    help='Width Multiplifier for MobilenetV2')
-
-# Params for SGD
-parser.add_argument('--lr', '--learning-rate', default=1e-3, type=float,
-                    help='initial learning rate')
-parser.add_argument('--momentum', default=0.9, type=float,
-                    help='Momentum value for optim')
-parser.add_argument('--weight_decay', default=5e-4, type=float,
-                    help='Weight decay for SGD')
-parser.add_argument('--gamma', default=0.1, type=float,
-                    help='Gamma update for SGD')
-parser.add_argument('--base_net_lr', default=None, type=float,
-                    help='initial learning rate for base net.')
-parser.add_argument('--extra_layers_lr', default=None, type=float,
-                    help='initial learning rate for the layers not in base net and prediction heads.')
 
 
 # Params for loading pretrained basenet or checkpoints.
@@ -52,23 +49,11 @@ parser.add_argument('--resume', default=None, type=str,
 parser.add_argument('--scheduler', default="multi-step", type=str,
                     help="Scheduler for SGD. It can one of multi-step and cosine")
 
-# Params for Multi-step Scheduler
-parser.add_argument('--milestones', default="80,100", type=str,
-                    help="milestones for MultiStepLR")
-
 # Params for Cosine Annealing
 parser.add_argument('--t_max', default=120, type=float,
                     help='T_max value for Cosine Annealing Scheduler.')
 
 # Train params
-parser.add_argument('--batch_size', default=32, type=int,
-                    help='Batch size for training')
-parser.add_argument('--num_epochs', default=120, type=int,
-                    help='the number epochs')
-parser.add_argument('--num_workers', default=4, type=int,
-                    help='Number of workers used in dataloading')
-parser.add_argument('--validation_epochs', default=5, type=int,
-                    help='the number epochs')
 parser.add_argument('--debug_steps', default=100, type=int,
                     help='Set the debug log output frequency.')
 parser.add_argument('--use_cuda', default=True, type=str2bool,
@@ -86,3 +71,46 @@ DEVICE = torch.device("cuda:0" if torch.cuda.is_available() and args.use_cuda el
 if args.use_cuda and torch.cuda.is_available():
     torch.backends.cudnn.benchmark = True
     logging.info("Use Cuda.")
+
+
+if __name__ == '__main__':
+    timer = Timer()
+
+    if args.net == 'etinynet-ssd':
+        create_net = create_etinynet_ssd_lite
+        config = etinynet_ssd_config
+    elif args.net == 'squeezenet-ssd':
+        create_net = create_squeezenet_ssd_lite
+        config = squeezenet_ssd_config
+    else:
+        logging.fatal("The net type is wrong.")
+        parser.print_help(sys.stderr)
+        sys.exit(1)
+    
+    if config.type == 'float64':
+        dtype = torch.float64
+    elif config.type == 'float32':
+        dtype = torch.float32
+    elif config.type == 'float16':
+        dtype = torch.float16
+    else:
+        raise ValueError('Wrong type!')  # TODO int8
+    
+    target_transform = MatchPrior(config.priors, config.center_variance,
+                                  config.size_variance, config.ssd_iou_thresh)
+    logging.info("Prepare training datasets.")
+    datasets = []
+    train_transforms = transforms.Compose([transforms.ToTensor(),
+                                           transforms.Normalize(mean = config.MEAN, 
+                                                                std = config.STD)])
+    
+    train_dataset = PascalVOCDataset(root_dir = config.train_path, transform = train_transforms)
+    logging.info("Train dataset size: {}".format(len(train_dataset)))
+    train_loader = DataLoader(train_dataset, config.batch_size, shuffle=False, collate_fn=train_dataset.collate)
+
+    logging.info("Prepare Validation datasets.")
+    val_dataset = PascalVOCDataset(root_dir = config.val_path, transform = train_transforms)
+    logging.info("validation dataset size: {}".format(len(val_dataset)))
+    val_loader = DataLoader(val_dataset, config.batch_size, shuffle = False, collate_fn=val_dataset.collate)
+
+    
