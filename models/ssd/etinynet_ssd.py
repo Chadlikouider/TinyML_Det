@@ -40,53 +40,49 @@ def create_etinynet_ssd_lite(num_classes, is_test=False):
 
 
     source_layer_indexes = [
-        17
+        11,
+        14,
+        len(base_net)#if use 16, change in_channels to 256
     ]
     extras = nn.ModuleList([
         nn.Sequential(
-            nn.Conv2d(in_channels=512, out_channels=256, kernel_size=1),
+            nn.Conv2d(in_channels=int(512 * config.width_multiplier), out_channels=128, kernel_size=1),
             nn.ReLU(),
-            SeperableConv2d(in_channels=256, out_channels=512, kernel_size=3, stride=2, padding=2),
-        ),
-        nn.Sequential(
-            nn.Conv2d(in_channels=512, out_channels=256, kernel_size=1),
-            nn.ReLU(),
-            SeperableConv2d(in_channels=256, out_channels=512, kernel_size=3, stride=2, padding=1),
-        ),
-        nn.Sequential(
-            nn.Conv2d(in_channels=512, out_channels=128, kernel_size=1),
-            nn.ReLU(),
-            SeperableConv2d(in_channels=128, out_channels=256, kernel_size=3, stride=2, padding=1),
+            SeperableConv2d(in_channels=128, out_channels=256, kernel_size=3, stride=2, padding=1),#4
         ),
         nn.Sequential(
             nn.Conv2d(in_channels=256, out_channels=128, kernel_size=1),
             nn.ReLU(),
-            SeperableConv2d(in_channels=128, out_channels=256, kernel_size=3, stride=2, padding=1),
+            SeperableConv2d(in_channels=128, out_channels=256, kernel_size=3, stride=2, padding=1),#2
         ),
         nn.Sequential(
             nn.Conv2d(in_channels=256, out_channels=128, kernel_size=1),
             nn.ReLU(),
-            SeperableConv2d(in_channels=128, out_channels=256, kernel_size=3, stride=2, padding=1)
+            SeperableConv2d(in_channels=128, out_channels=256, kernel_size=3, stride=2, padding=1)#1
         )
     ])
 
-    num_classes = 2
+    num_classes = 1
     is_test = False
     regression_headers = nn.ModuleList([
-        SeperableConv2d(in_channels=round(512 * config.width_multiplier), 
+        SeperableConv2d(in_channels=int(128 * config.width_multiplier), 
                         out_channels=config.num_priors[0] * 4, kernel_size=3, padding=1),
-        SeperableConv2d(in_channels=512, out_channels=config.num_priors[1] * 4, kernel_size=3, padding=1),
-        SeperableConv2d(in_channels=512, out_channels=config.num_priors[2] * 4, kernel_size=3, padding=1),
+        SeperableConv2d(in_channels=int(192 * config.width_multiplier), 
+                        out_channels=config.num_priors[1] * 4, kernel_size=3, padding=1),
+        SeperableConv2d(in_channels=int(512 * config.width_multiplier), 
+                        out_channels=config.num_priors[2] * 4, kernel_size=3, padding=1),
         SeperableConv2d(in_channels=256, out_channels=config.num_priors[3] * 4, kernel_size=3, padding=1),
         SeperableConv2d(in_channels=256, out_channels=config.num_priors[4] * 4, kernel_size=3, padding=1),
         nn.Conv2d(in_channels=256, out_channels=config.num_priors[5] * 4, kernel_size=1),
     ])
 
     classification_headers = nn.ModuleList([
-        SeperableConv2d(in_channels=round(512 * config.width_multiplier), 
+        SeperableConv2d(in_channels=int(128 * config.width_multiplier), 
                         out_channels=config.num_priors[0] * num_classes, kernel_size=3, padding=1),
-        SeperableConv2d(in_channels=512, out_channels=config.num_priors[1] * num_classes, kernel_size=3, padding=1),
-        SeperableConv2d(in_channels=512, out_channels=config.num_priors[2] * num_classes, kernel_size=3, padding=1),
+        SeperableConv2d(in_channels=int(192 * config.width_multiplier),
+                         out_channels=config.num_priors[1] * num_classes, kernel_size=3, padding=1),
+        SeperableConv2d(in_channels=int(512 * config.width_multiplier),
+                         out_channels=config.num_priors[2] * num_classes, kernel_size=3, padding=1),
         SeperableConv2d(in_channels=256, out_channels=config.num_priors[3] * num_classes, kernel_size=3, padding=1),
         SeperableConv2d(in_channels=256, out_channels=config.num_priors[4] * num_classes, kernel_size=3, padding=1),
         nn.Conv2d(in_channels=256, out_channels=config.num_priors[5] * num_classes, kernel_size=1),
@@ -95,8 +91,7 @@ def create_etinynet_ssd_lite(num_classes, is_test=False):
     #def count_parameters(model):
     #    return sum(p.numel() for p in model.parameters() if p.requires_grad)
 
-    #model = SSD(num_classes, base_net, source_layer_indexes, extras, classification_headers, regression_headers, is_test=is_test, config=config)
-
+    #model = SSD(num_classes, base_net, source_layer_indexes, extras, classification_headers, regression_headers, is_test=is_test, config=config)  
     #print("Number of parameters in the model:", count_parameters(model))
     
     return SSD(num_classes, base_net, source_layer_indexes,

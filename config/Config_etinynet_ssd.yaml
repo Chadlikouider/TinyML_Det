@@ -12,8 +12,8 @@ model:
                         # False: create the (backbone) model from scratch
   type: 'float32' # Available options: float16, float32, float64
   ssd:
-    feature_maps: [38,19, 10, 5, 3, 1]
-    shrinkage: [7, 14, 26, 52, 86, 256] # the shrinkage factor
+    feature_maps: [32,16, 8, 4, 2, 1] # there are 6132 anchor boxes
+    shrinkage: [8, 16, 32, 64, 128, 256] # the shrinkage factor
     min_sizes: [26, 67, 108, 149, 190, 231] # Minimum sizes of prior boxes
     max_sizes: [67, 108, 149, 190, 231, 256] # Maximum sizes of prior boxes
     aspect_ratios: [[2], [2, 3], [2, 3], [2, 3], [2], [2]] # Aspect ratios of prior boxes

@@ -108,9 +108,11 @@ if __name__ == '__main__':
     logging.info("Train dataset size: {}".format(len(train_dataset)))
     train_loader = DataLoader(train_dataset, config.batch_size, shuffle=False, collate_fn=train_dataset.collate)
 
+
     logging.info("Prepare Validation datasets.")
     val_dataset = PascalVOCDataset(root_dir = config.val_path, transform = train_transforms)
     logging.info("validation dataset size: {}".format(len(val_dataset)))
     val_loader = DataLoader(val_dataset, config.batch_size, shuffle = False, collate_fn=val_dataset.collate)
+    
 
     
