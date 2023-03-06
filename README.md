@@ -48,7 +48,7 @@ The model list:
 | SqueezeNet1.1             | ----M  |   0.74M     |       2.76MB        |       1.39MB        |       0.70MB       |
 | *# SSD baseline models*   |        |             |                     |                     |                    |
 | mbv2-w0.35-SSD            | ----M  |   ----M     |       -----         |       ----MB        |       ----MB       |
-| SqueezeNet1.1-SSD         | ----M  |   ----M     |       -----         |       ----MB        |       ----MB       |
+| SqueezeNet1.1-SSD         | ----M  |   1.32M     |       5.01MB        |       2.50MB        |       1.25MB       |
 | *# backbone models*       |        |             |                     |                     |                    |
 | etn-w1.0                  | ---M   |   0.66M     |       2.51MB        |       1.26MB        |       0.63MB       |
 | etn-w0.75                 | ----M  |   0.38M     |       1.45MB        |       0.73MB        |       0.36MB       |
