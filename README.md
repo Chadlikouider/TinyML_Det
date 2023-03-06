@@ -60,3 +60,6 @@ The model list:
 | etn-w0.5-SSDLite          | ----M  |   0.49M     |       1.89MB        |       0.95MB        |       0.48MB       |
 | etn-w0.35-SSDLite         | ----M  |   0.40M     |       1.53MB        |       0.77MB        |       0.39MB       |
 
+### EtinyNet-SSDLite
+Using the SSD-Lite and EtinyNet as a starting point, EtinyNet-SSDLite is an attempt to get a real time object detection algorithm on non-GPU computers and edge device such as STEM32 or ESP32. Since STEM32  by itself does not have enought computing capabilites, it requires more powerful base station or cloud to process the image/video information captured and detect objects in real-time. When EtinyNet-SSDLite is used, it eliminates the requirement of the base station and cloud process for real-time object detection.
+![image](https://github.com/Chadlikouider/TinyML_Det/blob/main/assets/overview%20architecture%20of%20EtinyNetw1.0-SSDLite.png?raw=true)<center>**<u>Figure 2</u>**:   *Overview architecture of EtinyNetw1.0-SSDLite.*</center><p>&nbsp;</p>
