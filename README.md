@@ -37,6 +37,7 @@ Additionally, the repository also includes SSD/SSD-Lite implementations based on
 ### Model List
 
 - We provide information on the number of parameters in each model, as well as the size of each parameter in three different floating-point formats: 32-bit, 16-bit, and 8-bit.
+- Throughout this project we're only using 1 class (Human)
 
 The model list:
 
@@ -54,8 +55,8 @@ The model list:
 | etn-w0.50                 | ----M  |   0.18M     |       0.68MB        |       0.34MB        |       0.17MB       |
 | etn-w0.35                 | ----M  |   0.09M     |       0.35MB        |       0.18MB        |         90kB       |
 | *# SSDLite models*        |        |             |                     |                     |                    |
-| etn-w1.0-SSDLite          | ---M   |   1.55M     |       5.91MB        |       2.96MB        |       1.48MB       |
-| etn-w0.75-SSDLite         | ----M  |   1.27M     |       4.82MB        |       2.41MB        |       1.2MB        |
-| etn-w0.5-SSDLite          | ----M  |   1.05M     |       4.02MB        |       2.01MB        |       1.01MB       |
-| etn-w0.35-SSDLite         | ----M  |   0.96M     |       3.67MB        |       1.84MB        |       0.92MB       |
+| etn-w1.0-SSDLite          | ---M   |   0.97M     |       3.71MB        |       1.86MB        |       0.93MB       |
+| etn-w0.75-SSDLite         | ----M  |   0.69M     |       2.64MB        |       1.32MB        |       0.66MB       |
+| etn-w0.5-SSDLite          | ----M  |   0.49M     |       1.89MB        |       0.95MB        |       0.48MB       |
+| etn-w0.35-SSDLite         | ----M  |   0.40M     |       1.53MB        |       0.77MB        |       0.39MB       |
 
