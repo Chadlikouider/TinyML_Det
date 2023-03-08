@@ -1,7 +1,7 @@
 # TinyML_Det
 This repository primarily incorporates [EtinyNet: Extremely Tiny Network for TinyML ](https://ojs.aaai.org/index.php/AAAI/article/view/20387) as its backbone and adds [SSD (Single Shot MultiBox Detector)](https://arxiv.org/abs/1512.02325). to achieve high accuracy object detection. The implementation is influenced by [ssd.pytorch](https://github.com/amdegroot/ssd.pytorch) and [Detectron](https://github.com/facebookresearch/Detectron).
 The goal of this implementation is to create a lightweight and accurate object detection model suitable for embedded systems. <br>
-Additionally, the repository also includes SSD/SSD-Lite implementations based on MobileNetV2, Squeezenet, and Squeeznext.
+Additionally, the repository also includes SSD/SSD-Lite implementations based on MobileNetV2, and Squeezenet.
 
 ## Codebase Structure 
 (The codebase structure after completing the codebase construction process, which is shown below in [`Detailed Instruction`](#detailed-instruction))
@@ -9,18 +9,29 @@ Additionally, the repository also includes SSD/SSD-Lite implementations based on
     .
     ├── ...
     ├── config/                                # configuration file folder.
-    │   ├── config.py                          # The config file to set configuration of network.
-    │   └── ...                                
+    │   ├── etinynet_ssd_config.py             # The config file to read configuration of network from .yaml.
+    │   └── Config_etinynet_ssd.yaml           # The configuration parameters of the etinynet network
+    |   └── squeezenet_ssd_config.py           # The config file to read configuration of network from .yaml.
+    |   └── Config_squeezenet_ssd.yaml         # The configuration parameters of the squeezenet network
+    |
     ├── dataset/                               # dataset file folder.
     |   ├── pascal_voc.py                      # dataloader file for images with annotation in pascal voc format
+    |
     ├── models/                                # Models file folder.
-    |   ├──nn/                                 # backbone file folder
+    |   ├──nn/                                 # Backbone file folder + boxes loss function
+    |       ├── etinynet.py                    # The feature extractor based on EtinyNet architecture 
+    |       └── squeezenet.py                  # The feature extractor based on SqueezeNet architecture 
+    |       └── multibox_loss.py               # Object file to compute classification and regression loss
     |   ├──ssd/                                # Backbone + SSD file folder
-    ├── utils/                                 # utilities file folder.
-    │   ├── main.cpp                           # Main source file.
-    │   ├── TinyEngine                         # TinyEngine folder.
-    │   └── ...                                
-    └── ...
+    |       ├── ssd.py                         # The SSD object file 
+    |       └── Squeezenet_ssd.py              # The file to connect SqueezeNet feature extractor with extra-layers and headers,return SSD object
+    |       └── etinynet_ssd.py                # The file to connect etinynet feature extractor with extra-layers and headers,return SSD object
+    ├── utils/                                 # Utilities file folder.
+    │   ├── box_utils.py                       # Functions and utilities related to localization boxes.
+    │   ├── common_tools.py                    # Common tools for evaluation such as mAP.
+    │   └── misc.py                            # file containig the function to save checkpoints and perform TF 
+    └── tain_ssd.py                            # file to perform the training
+    └── eval_ssd.py                            # file to perform evaluation on test data
     
     
     
@@ -62,4 +73,4 @@ The model list:
 
 ### EtinyNet-SSDLite
 Using the SSD-Lite and EtinyNet as a starting point, EtinyNet-SSDLite is an attempt to get a real time object detection algorithm on non-GPU computers and edge device such as STEM32 or ESP32. Since STEM32  by itself does not have enought computing capabilites, it requires more powerful base station or cloud to process the image/video information captured and detect objects in real-time. When EtinyNet-SSDLite is used, it eliminates the requirement of the base station and cloud process for real-time object detection.
-![image](https://github.com/Chadlikouider/TinyML_Det/blob/main/assets/overview%20architecture%20of%20EtinyNetw1.0-SSDLite.png?raw=true)<center>**<u>Figure 2</u>**:   *Overview architecture of EtinyNetw1.0-SSDLite.*</center><p>&nbsp;</p>
+![image](https://github.com/Chadlikouider/TinyML_Det/blob/main/assets/overview%20architecture%20of%20EtinyNetw1.0-SSDLite.png?raw=true) <center>**<u>Figure 2</u>**:   *Overview architecture of EtinyNetw1.0-SSDLite.*</center><p>&nbsp;</p>
