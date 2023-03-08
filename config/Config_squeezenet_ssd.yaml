@@ -2,8 +2,8 @@
 dataset:
   train: D:\\master_project_codes\\heridal\\testImages
   val: D:\\master_project_codes\\heridal\\testImages
-  num_classes: 2
-  class_names: ['human', 'dog']
+  num_classes: 1
+  class_names: ['human']
   input_size: 256
 # Model information
 model:
@@ -33,17 +33,24 @@ model:
 # Training information
 train:
   batch_size: 32 # Batch size for training
+  num_epochs: 50 # Number of epochs for training
   optimizer:
     type: SGD # Name of the optimizer
     lr: 0.001 # value of the learning rate
     momentum: 0.9
     weight_decay: 5e-4 # Weight decay
   scheduler:
-    type: MultiStepLR # Name of learning rate scheduler
+    type: multi-step # Name of learning rate scheduler, Available: multi-step, cosine
     milestones: [20, 40] # Learning rate milestones
     gamma: 0.1 # Learning rate decay factor
-  num_epochs: 50 # Number of epochs for training
-
+  start_from_scratch: True
+  # set the path of at most one of the three, Otherwise set None or False
+  resume: "/path/to/checkpoint.pth"  # path to checkpoint to resume from
+  base_net: "/path/to/base_net.pth"  # path to base net to initialize from
+  pretrained_ssd: "/path/to/pretrained_ssd.pth"  # path to pretrained SSD to initialize from
+  # set the path of at most one of the two, Otherwise set None or False
+  freeze_base_net: True  # whether to freeze the base net
+  freeze_net: False  # whether to freeze the extra layers
 # testing information
 test:
   batch_size: 32 # Batch size for testing

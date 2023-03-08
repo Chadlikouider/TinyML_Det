@@ -179,8 +179,8 @@ class SSD(nn.Module):
         self.regression_headers.apply(_xavier_init_)
 
     # This function takes as input a pretrained SSD model and initializes 
-    # the weights of the added layers and the headers with the Xavier 
-    # initialization, while keeping the weights of the base network unchanged.
+    # the weights of the headers with the Xavier initialization,
+    # while keeping the weights of the base network and extra-layers unchanged.
     def init_from_pretrained_ssd(self, model):
         # Load the state dict of the pretrained SSD model from the specified model file
         state_dict = torch.load(model, map_location=lambda storage, loc: storage)

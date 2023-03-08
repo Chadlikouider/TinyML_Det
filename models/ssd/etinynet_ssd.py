@@ -62,8 +62,6 @@ def create_etinynet_ssd_lite(num_classes, is_test=False):
         )
     ])
 
-    num_classes = 1
-    is_test = False
     regression_headers = nn.ModuleList([
         SeperableConv2d(in_channels=int(128 * config.width_multiplier), 
                         out_channels=config.num_priors[0] * 4, kernel_size=3, padding=1),

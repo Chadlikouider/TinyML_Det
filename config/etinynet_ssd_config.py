@@ -49,12 +49,17 @@ batch_size = config['train']['batch_size']
 optimizer_type = config['train']['optimizer']['type']
 learning_rate = config['train']['optimizer']['lr']
 momentum = config['train']['optimizer']['momentum']
-weight_decay = config['train']['optimizer']['weight_decay']
+weight_decay = float(config['train']['optimizer']['weight_decay'])
 scheduler_type = config['train']['scheduler']['type']
 milestones = config['train']['scheduler']['milestones']
 gamma = config['train']['scheduler']['gamma']
 num_epochs = config['train']['num_epochs']
-
+start_from_scratch = config['train']['start_from_scratch']
+resume = config['train']['resume']
+base_net = config['train']['base_net']
+pretrained_ssd = config['train']['pretrained']
+freeze_base_net = config['train']['freeze_base_net']
+freeze_net = config['train']['freeze_net']
 # Testing configuration
 test_batch_size = config['test']['batch_size']
 
