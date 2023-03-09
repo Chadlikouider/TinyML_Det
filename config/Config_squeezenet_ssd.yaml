@@ -41,7 +41,7 @@ train:
     weight_decay: 5e-4 # Weight decay
   scheduler:
     type: multi-step # Name of learning rate scheduler, Available: multi-step, cosine
-    milestones: [20, 40] # Learning rate milestones
+    milestones: "20,40" # Learning rate milestones
     gamma: 0.1 # Learning rate decay factor
   start_from_scratch: True
   # set the path of at most one of the three, Otherwise set None or False

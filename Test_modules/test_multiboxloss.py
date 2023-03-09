@@ -25,7 +25,6 @@ multibox_loss = MultiboxLoss(priors, 0.5, 3, 0.1, 0.2, device)
 
 # Call the forward function
 smooth_l1_loss, classification_loss = multibox_loss(confidence, predicted_locations, labels, gt_locations)
-
 # Print the results
 print("Smooth L1 loss: ", smooth_l1_loss.item())
 print("Classification loss: ", classification_loss.item())

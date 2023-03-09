@@ -39,7 +39,7 @@ parser.add_argument('--net', default="etinynet-ssd",
 
 
 # Train params
-parser.add_argument('--use_cuda', default=True, type=str2bool,
+parser.add_argument('--use_cuda', default=False, type=str2bool,
                     help='Use CUDA to train model')
 
 parser.add_argument('--checkpoint_folder', default='models/',
@@ -82,25 +82,33 @@ def main():
     target_transform = MatchPrior(config.priors, config.center_variance,
                                   config.size_variance, config.ssd_iou_thresh)
     logging.info("Prepare training datasets.")
-    datasets = []
+    
     train_transforms = transforms.Compose([transforms.ToTensor(),
                                            transforms.Normalize(mean = config.MEAN, 
                                                                 std = config.STD)])
     
-    train_dataset = PascalVOCDataset(root_dir = config.train_path, transform = train_transforms)
+    train_dataset = PascalVOCDataset(root_dir = config.train_path,
+                                     class_names=config.class_names,
+                                     size =(config.input_size,config.input_size),
+                                     target_transform=target_transform,
+                                     transform = train_transforms)
+    
     logging.info("Train dataset size: {}".format(len(train_dataset)))
     train_loader = DataLoader(train_dataset, config.batch_size, shuffle=False, collate_fn=train_dataset.collate)
 
-
     logging.info("Prepare Validation datasets.")
-    val_dataset = PascalVOCDataset(root_dir = config.val_path, transform = train_transforms)
+    val_dataset = PascalVOCDataset(root_dir = config.val_path,
+                                   class_names=config.class_names,
+                                   size =(config.input_size,config.input_size),
+                                   target_transform= target_transform,
+                                   transform = train_transforms)
     logging.info("validation dataset size: {}".format(len(val_dataset)))
     val_loader = DataLoader(val_dataset, config.batch_size, shuffle = False, collate_fn=val_dataset.collate)
     
 
     logging.info("Build network.")
     net = create_net(config.num_classes)
-    min_loss = -10000.0
+    #min_loss = -10000.0
     last_epoch = -1
     
 
@@ -205,13 +213,11 @@ def main():
 
         print('\nEpoch: [%d | %d]' % (epoch + 1, config.num_epochs))
 
-        scheduler.step()
-
         train_loss, train_regression_loss, train_classification_loss = train(train_loader,
                                                                              net, criterion, 
                                                                              optimizer,
                                                                              device=DEVICE)
-        
+        scheduler.step()
         val_loss, val_regression_loss, val_classification_loss = validate(val_loader, net, criterion, DEVICE)
 
 
@@ -269,8 +275,6 @@ def train(loader, net, criterion, optimizer, device):
         boxes = boxes.to(device)
         labels = labels.to(device)
 
-
-        
         confidence, locations = net(images)
         regression_loss, classification_loss = criterion(confidence, locations, labels, boxes)  # TODO CHANGE BOXES
         loss = regression_loss + classification_loss
@@ -284,7 +288,7 @@ def train(loader, net, criterion, optimizer, device):
         optimizer.zero_grad()
         loss.backward()
         optimizer.step()
-    
+
     # Average the results
     total_loss = total_loss/len(loader)
     loc_loss = loc_loss/len(loader)
@@ -312,7 +316,7 @@ def validate(loader, net, criterion, device):
         images = images.to(device)
         boxes = boxes.to(device)
         labels = labels.to(device)
-
+        
         with torch.no_grad():
             confidence, locations = net(images)
             regression_loss, classification_loss = criterion(confidence, locations, labels, boxes)
@@ -323,7 +327,7 @@ def validate(loader, net, criterion, device):
         loc_loss += regression_loss.item()
         class_loss += classification_loss.item()
 
-    
+
     return total_loss/len(loader), loc_loss/len(loader), class_loss/len(loader)
         
 

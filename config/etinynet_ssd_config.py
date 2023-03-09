@@ -57,7 +57,7 @@ num_epochs = config['train']['num_epochs']
 start_from_scratch = config['train']['start_from_scratch']
 resume = config['train']['resume']
 base_net = config['train']['base_net']
-pretrained_ssd = config['train']['pretrained']
+pretrained_ssd = config['train']['pretrained_ssd']
 freeze_base_net = config['train']['freeze_base_net']
 freeze_net = config['train']['freeze_net']
 # Testing configuration

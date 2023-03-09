@@ -1,9 +1,9 @@
 # Dataset information
 dataset:
-  train: D:\\master_project_codes\\heridal\\testImages
-  val: D:\\master_project_codes\\heridal\\testImages
+  train: 'C:\\Users\\wakcomputer\\Downloads\\Pedestrain-Detection.v3i.voc\\train'
+  val: 'C:\\Users\\wakcomputer\\Downloads\\Pedestrain-Detection.v3i.voc\\valid'
   num_classes: 2
-  class_names: ['human', 'dog']
+  class_names: ['object']
   input_size: 256
 # Model information
 model:
@@ -32,8 +32,8 @@ model:
 
 # Training information
 train:
-  batch_size: 32 # Batch size for training
-  num_epochs: 50 # Number of epochs for training
+  batch_size: 16 # Batch size for training
+  num_epochs: 25 # Number of epochs for training
   optimizer:
     type: SGD # Name of the optimizer
     lr: 0.001 # value of the learning rate
@@ -41,18 +41,18 @@ train:
     weight_decay: 5e-4 # Weight decay
   scheduler:
     type: multi-step # Name of learning rate scheduler,Available: multi-step, cosine
-    milestones: [20, 40] # Learning rate milestones
+    milestones: "20,40" # Learning rate milestones
     gamma: 0.1 # Learning rate decay factor
   
   start_from_scratch: True
 
   # set the path of at most one of the three, Otherwise set None or False
-  resume: "/path/to/checkpoint.pth"  # path to checkpoint to resume from
-  base_net: "/path/to/base_net.pth"  # path to base net to initialize from
-  pretrained_ssd: "/path/to/pretrained_ssd.pth"  # path to pretrained SSD to initialize from
+  resume: None #"/path/to/checkpoint.pth"  # path to checkpoint to resume from
+  base_net: None #"/path/to/base_net.pth"  # path to base net to initialize from
+  pretrained_ssd: None #"/path/to/pretrained_ssd.pth"  # path to pretrained SSD to initialize from
 
   # set the path of at most one of the two, Otherwise set None or False
-  freeze_base_net: True  # whether to freeze the base net
+  freeze_base_net: False  # whether to freeze the base net
   freeze_net: False  # whether to freeze the extra layers
 
 # testing information
@@ -64,7 +64,7 @@ output_dir: path/to/output/directory
 # Miscellaneous configuration
 misc:
   device: cuda:0  # specify the GPU device to use, e.g. cuda:0 or cuda:1 .Also possible to run on cpu, use device: cpu
-  checkpoint_dir: /path/to/checkpoints/ # Directory to save trained model
-  log_dir: ./logs # Directory to save training logs
+  checkpoint_dir: D:\\master_project_codes\\EtinyNet_Pytorch\\results\\models # Directory to save trained model
+  log_dir: D:\\master_project_codes\\EtinyNet_Pytorch\\results\\log # Directory to save training logs
   log_interval: 15
-  save_interval: 20
+  save_interval: 10

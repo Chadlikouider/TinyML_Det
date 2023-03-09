@@ -14,23 +14,27 @@ The structure of the dataset should be as follow:
 
 import os
 import torch
+import numpy as np
 from torch.utils.data import Dataset, DataLoader
 from torchvision import transforms
 import xml.etree.ElementTree as ET
 import matplotlib.pyplot as plt
 import cv2
-
+from config import etinynet_ssd_config as config
 # Custom dataset class to load images with annotations in Pascal VOC format
 class PascalVOCDataset(Dataset):
     # Initialize the dataset with the root directory and optional transform
-    def __init__(self, root_dir, size, class_names,transform=None):
+    def __init__(self, root_dir, size, class_names, target_transform=None, transform=None):
         self.root_dir = root_dir # root directory of the dataset
         self.transform = transform # optional transform to be applied to the image
         self.size = size # target image size
-        self.img_list = [file for file in os.listdir(self.root_dir) if file.endswith('.JPG')] # list of all jpg files in the root directory
-
-        class_names.insert(0,'BACKGROUND')
-        self.class_names = tuple(class_names)
+        self.target_transform = target_transform
+        self.img_list = [file for file in os.listdir(self.root_dir) if file.endswith('.jpg')] # list of all jpg files in the root directory
+        
+        self.class_names=class_names
+        if 'BACKGROUND' not in class_names:
+            class_names.insert(0,'BACKGROUND')
+        self.class_names = tuple(self.class_names)
 
 
         self.class_dict = {class_name: i for i, class_name in enumerate(self.class_names)}
@@ -62,7 +66,8 @@ class PascalVOCDataset(Dataset):
         # Apply the transform to the image if it is specified
         if self.transform:
             img = self.transform(img)
-            
+        if self.target_transform:
+            annotations, labels = self.target_transform(annotations,labels) # tuen corner to location format
         # Return in tuple form
         return img, annotations, labels
 
@@ -70,8 +75,9 @@ class PascalVOCDataset(Dataset):
     def parse_annotations(self, img_path, size = None):
         annotations = [] # list to store the annotations
         labels = [] # list to store label
-        xml_path = img_path.replace('.JPG', '.xml')
-        xml_path = os.path.join(os.path.dirname(img_path), 'annotations', os.path.basename(xml_path)) # path of the XML file
+        xml_path = img_path.replace('.jpg', '.xml')
+        #xml_path = os.path.join(os.path.dirname(img_path), 'annotations', os.path.basename(xml_path)) # path of the XML file
+        xml_path = os.path.join(os.path.dirname(img_path), os.path.basename(xml_path)) # path of the XML file
         tree = ET.parse(xml_path) # parse the XML file
         root = tree.getroot() # get the root element of the XML file
 
@@ -101,7 +107,10 @@ class PascalVOCDataset(Dataset):
                 labels.append(self.class_dict[label])
             else:
                 print(f"Warning: Label {label} not found in class dictionary. Skipping.")
-        return annotations, labels # return the annotations and labels
+
+            return (np.array(annotations, dtype=np.float32),
+                    np.array(labels, dtype=np.int64))
+        #return annotations, labels # return the annotations and labels
     """note to self: output is in form of : Annotations:[[[list xy_person1_img1],[xy_person2_img1],..],[xy_person1_img2],[xy_person2_img2],..]
                                             labels(integer encoding):  [[list labels of image 1],[list labels of image 2]]"""
     
@@ -114,12 +123,32 @@ class PascalVOCDataset(Dataset):
         item = batch[0]
         if len(item) != 3:
             raise ValueError(f"Expected 3 elements in item but got {len(item)}")
-        
-        images = [item[0] for item in batch] # get the images from the batch
-        annotations = [item[1] for item in batch] # get the annotations from the batch
-        labels = [item[2] for item in batch] # get the labels from the batch
-        
-        return torch.stack(images), annotations, labels # return the mini-batch as tensor of images and list of annotations
+        images = []
+        gt_boxes = []
+        gt_labels = []
+        image_type = type(batch[0][0])
+        box_type = type(batch[0][1])
+        label_type = type(batch[0][2])
+        for image, boxes, labels in batch:
+            if image_type is np.ndarray:
+                images.append(torch.from_numpy(image))
+            elif image_type is torch.Tensor:
+                images.append(image)
+            else:
+                raise TypeError(f"Image should be tensor or np.ndarray, but got {image_type}.")
+            if box_type is np.ndarray:
+                gt_boxes.append(torch.from_numpy(boxes))
+            elif box_type is torch.Tensor:
+                gt_boxes.append(boxes)
+            else:
+                raise TypeError(f"Boxes should be tensor or np.ndarray, but got {box_type}.")
+            if label_type is np.ndarray:
+                gt_labels.append(torch.from_numpy(labels))
+            elif label_type is torch.Tensor:
+                gt_labels.append(labels)
+            else:
+                raise TypeError(f"Labels should be tensor or np.ndarray, but got {label_type}.")
+        return torch.stack(images), torch.stack(gt_boxes), torch.stack(gt_labels)# return the mini-batch as tensor of images and list of annotations
 
 
 
@@ -135,9 +164,10 @@ def plot_image(img, annotations):
 
 if __name__ == "__main__": 
     # Create instances of the custom dataset class for train, validation and test datasets
-    labels=['human']
-    test_dataset = PascalVOCDataset(root_dir='D:\\master_project_codes\\heridal\\testImages',
+    labels=['object']
+    test_dataset = PascalVOCDataset(root_dir=config.train_path,
                                     size= (300,300),class_names = labels, transform=transforms.ToTensor())
+    print("Train dataset size: {}".format(len(test_dataset)))
     test_loader = DataLoader(test_dataset, batch_size=16, shuffle=False, collate_fn=test_dataset.collate)
     
     # Loop through the mini-batches and plot the images with their bounding boxes
