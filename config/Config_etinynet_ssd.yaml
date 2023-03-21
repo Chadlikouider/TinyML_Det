@@ -3,7 +3,7 @@ dataset:
   train: 'C:\\Users\\wakcomputer\\Downloads\\Pedestrain-Detection.v3i.voc\\train'
   val: 'C:\\Users\\wakcomputer\\Downloads\\Pedestrain-Detection.v3i.voc\\valid'
   num_classes: 2
-  class_names: ['object']
+  class_names: ['BACKGROUND','object']
   input_size: 256
 # Model information
 model:
@@ -21,6 +21,7 @@ model:
     size_variance: 0.2 # size of variance of anchor boxes
     iou_thresh: 0.5 # IOU threshold for non-maximum suppression
     nms_thresh: 0.45 # NMS threshold for detection
+    nms_method: soft
     #=============================================================
     # Note to self: 
     # 1- pick m feature maps (chose m=6)
@@ -32,8 +33,8 @@ model:
 
 # Training information
 train:
-  batch_size: 16 # Batch size for training
-  num_epochs: 25 # Number of epochs for training
+  batch_size: 32 # Batch size for training
+  num_epochs: 100 # Number of epochs for training
   optimizer:
     type: SGD # Name of the optimizer
     lr: 0.001 # value of the learning rate
@@ -58,6 +59,8 @@ train:
 # testing information
 test:
   batch_size: 32 # Batch size for testing
+  eval_dir: path/
+  trained_model: path/.pth
 
 output_dir: path/to/output/directory
 

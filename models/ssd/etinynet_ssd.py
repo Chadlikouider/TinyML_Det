@@ -10,7 +10,7 @@ from models.ssd.ssd import SSD
 from models.nn.etinynet import etinynet_100, etinynet_075, etinynet_050, etinynet_035
 
 from config import etinynet_ssd_config as config
-
+from models.ssd.predictor import Predictor
 def SeperableConv2d(in_channels, out_channels, kernel_size=1, stride=1, 
                     padding=0):
     """Replace Conv2d with a depthwise Conv2d and Pointwise Conv2d.
@@ -94,3 +94,13 @@ def create_etinynet_ssd_lite(num_classes, is_test=False):
     
     return SSD(num_classes, base_net, source_layer_indexes,
                extras, classification_headers, regression_headers, is_test=is_test, config=config)
+
+def create_etinynet_ssd_lite_predictor(net, candidate_size=200, nms_method=None, sigma=0.5, device=torch.device('cpu')):
+    predictor = Predictor(net, config.input_size, config.MEAN,
+                          config.STD,
+                          nms_method=nms_method,
+                          iou_threshold=config.ssd_iou_thresh,
+                          candidate_size=candidate_size,
+                          sigma=sigma,
+                          device=device)
+    return predictor

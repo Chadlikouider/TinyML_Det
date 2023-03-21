@@ -9,6 +9,7 @@ from torch.nn import Conv2d, Sequential, ModuleList, ReLU
 from models.nn.squeezenet import squeezenet1_0, squeezenet1_1
 
 from models.ssd.ssd import SSD
+from models.ssd.predictor import Predictor
 from config import squeezenet_ssd_config as config
 
 
@@ -82,3 +83,13 @@ def create_squeezenet_ssd_lite(num_classes ,is_test=False):
     #print("Number of parameters in the model:", count_parameters(model))
     return SSD(num_classes, base_net, source_layer_indexes,
                extras, classification_headers, regression_headers, is_test=is_test, config=config)
+
+def create_squeezenet_ssd_lite_predictor(net, candidate_size=200, nms_method=None, sigma=0.5, device=torch.device('cpu')):
+    predictor = Predictor(net, config.input_size, config.MEAN,
+                          config.STD,
+                          nms_method=nms_method,
+                          iou_threshold=config.ssd_iou_thresh,
+                          candidate_size=candidate_size,
+                          sigma=sigma,
+                          device=device)
+    return predictor
